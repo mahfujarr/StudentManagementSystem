@@ -1,17 +1,21 @@
 from django.db import models
 from django.utils import timezone
 import os
+import re
+
 #Functions
 def student_image_path(instance, filename):
     ext = filename.split('.')[-1]
-    filename = f"{instance.student_id}.{ext}"
-    return os.path.join('student_img/', filename)
+    # Use a safe filename based on student ID
+    safe_id = re.sub(r'[^a-zA-Z0-9]', '_', str(instance.student_id))
+    filename = f"{safe_id}.{ext}"
+    return os.path.join('student_img', filename)
 
 # Create your models here.
 class Student(models.Model):
     f_name = models.CharField(max_length=255, verbose_name="First Name")
     l_name = models.CharField(max_length=255, verbose_name="Last Name")
-    student_id = models.IntegerField(verbose_name="Student ID")
+    student_id = models.CharField(max_length=20, verbose_name="Student ID", unique=True)
     gender = models.CharField(max_length=10, choices=[('Male','Male'), ('Female', 'Female'), ('Others', 'Others') ])
     dob = models.DateField(verbose_name="Date of Birth")
     current_year = timezone.now().year
@@ -20,9 +24,9 @@ class Student(models.Model):
     student_session = models.CharField(
         max_length=10, 
         choices=[
-            (f"{year - 1}-JUN", f"{year - 1}-JUN"), 
+            (f"{year - 1}-JUL", f"{year - 1}-JUL"), 
             (f"{year}-JAN", f"{year}-JAN"), 
-            (f"{year}-JUN", f"{year}-JUN"), 
+            (f"{year}-JUL", f"{year}-JUL"), 
             (f"{year + 1}-JAN", f"{year + 1}-JAN")
         ], verbose_name="Session",default = f"{year}-JAN" if month <= 6 else f"{year}-JUL")
     religion = models.CharField(max_length=10)

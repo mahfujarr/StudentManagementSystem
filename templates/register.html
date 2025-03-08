@@ -42,7 +42,7 @@
                         {% endif %}
                         
                         <!-- Registration Form -->
-                        <form method="POST" action="{% url 'signup' %}">
+                        <form method="POST" action="#">
                             {% csrf_token %}
                             <div class="form-group">
                                 <input class="form-control" type="text" name="first_name" placeholder="First Name" required>
@@ -64,7 +64,7 @@
                             </div>
                         </form>
 
-                        <div class="login-or">
+                        {% comment %} <div class="login-or">
                             <span class="or-line"></span>
                             <span class="span-or">or</span>
                         </div>
@@ -73,10 +73,10 @@
                             <span>Register with</span>
                             <a href="#" class="facebook"><i class="fab fa-facebook-f"></i></a>
                             <a href="#" class="google"><i class="fab fa-google"></i></a>
-                        </div>
+                        </div> {% endcomment %}
 
                         <div class="text-center dont-have">Already have an account? 
-                            <a href="{% url 'login' %}">Login</a>
+                            <a href="#">Login</a>
                         </div>
                     </div>
                 </div>

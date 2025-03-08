@@ -23,8 +23,8 @@ urlpatterns = [
     path('list', list, name='student-list'),
     path('add', add, name='student-add'),
     path('edit', edit, name='student-edit'),
-    path('details', details, name='student-details'),
+    path('details/<str:student_id>', details, name='student-details'),
     path('fees_collections', fees_collections, name='fees-collections'),
     path('add_fees_collection', add_fees_collection, name='add-fees-collection'),
-
+    path('register-new-admin', register_new_admin, name='register-new-admin'),
 ]
