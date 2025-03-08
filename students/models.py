@@ -58,14 +58,47 @@ class Student(models.Model):
     def __str__(self):
         return f"{self.f_name} {self.l_name}"
     
-class Payment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="fees")
-    amount = models.DecimalField(max_digits=10, decimal_places=0)
-    # due_date = models.DateField()
-    paid = models.BooleanField(default=False)
-    payment_date = models.DateField(default=timezone.now, blank=True, null=True)
-    # transaction_id = models.CharField(max_length=100, blank=True, null=True)
+class Course(models.Model):
+    COURSE_TYPES = [
+        ('Regular', 'Regular Course'),
+        ('Advanced', 'Advanced Course'),
+        ('Professional', 'Professional Course')
+    ]
+    
+    name = models.CharField(max_length=100)
+    course_type = models.CharField(max_length=20, choices=COURSE_TYPES)
+    fees = models.DecimalField(max_digits=10, decimal_places=0)
+    description = models.TextField(blank=True, null=True)
+    duration_months = models.IntegerField(default=6)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['course_type']
     
     def __str__(self):
-        status = "Paid" if self.paid else "Due"
-        return f"{self.student.f_name} {self.student.l_name} - {status}"
+        return f"{self.name}"
+
+class Payment(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="fees")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="payments", null=True, blank=True)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=0)
+    payment_date = models.DateField(default=timezone.now)
+    PAYMENT_STATUS = [
+        ('Pending', 'Pending'),
+        ('Partial', 'Partial'),
+        ('Completed', 'Completed')
+    ]
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='Pending')
+    notes = models.TextField(max_length=100, blank=True, null=True)
+    
+    @property
+    def remaining_amount(self):
+        if self.course:
+            return self.course.fees - self.amount_paid
+        return 0
+    
+    def __str__(self):
+        course_name = self.course.name if self.course else "No Course"
+        return f"{self.student.f_name} {self.student.l_name} - {course_name} - {self.status}"
+

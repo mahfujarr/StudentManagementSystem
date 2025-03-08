@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block body %}
-
 <div class="page-wrapper">
     <div class="content container-fluid">
         <div class="page-header">
@@ -36,98 +35,204 @@
                     <div class="col-md-12">
                         <div class="about-info">
                             <h5 class="form-title"><span>Student Information</span></h5>
-                            <div class="media mt-3">
-                                {% if student.image %}
-                                <img src="{{ student.image.url }}" class="mr-3" alt="Student Image"
-                                    style="max-width: 150px; border-radius: 5px;">
-                                {% else %}
-                                <img class="avatar-img rounded" src="{% static 'assets/img/default-user.png' %}"
-                                    alt="Default Image" style="max-width: 150px;">
-                                {% endif %}
-                                <div class="media-body">
-                                    <ul>
-                                        <li>
-                                            <span class="title-span"><strong>Full Name :</strong></span>
-                                            <span class="info-span">{{ student.f_name }} {{ student.l_name }}</span>
-                                        </li>
-                                        <li>
-                                            <span class="title-span"><strong>Student ID :</strong></span>
-                                            <span class="info-span">{{ student.student_id }}</span>
-                                        </li>
-                                        <li>
-                                            <span class="title-span"><strong>Session :</strong></span>
-                                            <span class="info-span">{{ student.student_session }}</span>
-                                        </li>
-                                        <li>
-                                            <span class="title-span"><strong>Mobile :</strong></span>
-                                            <span class="info-span">{{ student.phone }}</span>
-                                        </li>
-                                        <li>
-                                            <span class="title-span"><strong>Email :</strong></span>
-                                            <span class="info-span">{{ student.email }}</span>
-                                        </li>
-                                        <li>
-                                            <span class="title-span"><strong>Gender :</strong></span>
-                                            <span class="info-span">{{ student.gender }}</span>
-                                        </li>
-                                        <li>
-                                            <span class="title-span"><strong>Date of Birth :</strong></span>
-                                            <span class="info-span">{{ student.dob|date:"d M Y" }}</span>
-                                        </li>
-                                    </ul>
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="media">
+                                                {% if student.image %}
+                                                <img src="{{ student.image.url }}" class="mr-3" alt="Student Image"
+                                                    style="max-width: 150px; border-radius: 5px;">
+                                                {% else %}
+                                                <img class="avatar-img rounded mr-3" src="{% static 'assets/img/default_user.png' %}"
+                                                    alt="Default Image" style="max-width: 150px;">
+                                                {% endif %}
+                                                <div class="media-body">
+                                                    <ul class="list-unstyled mb-0">
+                                                        <li>
+                                                            <span class="title-span"><strong>Full Name :</strong></span>
+                                                            <span class="info-span">{{ student.f_name }} {{ student.l_name }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Student ID :</strong></span>
+                                                            <span class="info-span">{{ student.student_id }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Session :</strong></span>
+                                                            <span class="info-span">{{ student.student_session }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Mobile :</strong></span>
+                                                            <span class="info-span">{{ student.phone }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Email :</strong></span>
+                                                            <span class="info-span">{{ student.email }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Gender :</strong></span>
+                                                            <span class="info-span">{{ student.gender }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Date of Birth :</strong></span>
+                                                            <span class="info-span">{{ student.dob|date:"d M Y" }}</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="card-title mb-0"><strong>Payment Summary</strong></h5>
+                                                <a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#myModal">Add Payment</a>
+                                            </div>
+                                            <div class="payment-summary">
+                                                <p>Total Fees: <span class="text-primary"><strong> ৳{{ total_fees }}</strong></span></p>
+                                                <p>Total Paid: <span class="text-success"><strong> ৳{{ total_paid }}</strong></span></p>
+                                                <p>Remaining: <span class="text-danger"><strong> ৳{{ total_remaining }}</strong></span></p>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                    <!-- modal -->
+                                    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                          <div class="modal-content">
+                                            <div class="modal-header">
+                                              <h5 class="modal-title" id="exampleModalLabel">Adding the payment</h5>
+                                              <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                                            </div>
+                                            <div class="modal-body">
+                                              <form>
+                                                <div class="mb-3">
+                                                  <label for="recipient-name" class="col-form-label">Amount:</label>
+                                                  <input type="text" class="form-control" id="recipient-name">
+                                                </div>
+                                              </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+                                              <button type="button" class="btn btn-primary">Add Payment</button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      
+                                    {% if payments %}
+                                    <div class="card mt-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Payment History</h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Course</th>
+                                                            <th>Amount</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for payment in payments %}
+                                                        <tr>
+                                                            <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                                                            <td>{{ payment.course.name }}</td>
+                                                            <td>৳{{ payment.amount_paid }}</td>
+                                                            <td>
+                                                                <span class="badge {% if payment.status == 'Completed' %}badge-success{% elif payment.status == 'Partial' %}badge-warning{% else %}badge-danger{% endif %}">
+                                                                    {{ payment.status }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info mt-3">
+                                        No payment records found.
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="row mt-3">
                                 <div class="col-md-12">
-                                    <h5 class="form-title"><span>Parent Information</span></h5>
+                                    <h4>Parent Information <span class="border-bottom border-dark w-100 d-inline-block" style="margin-left: 10px;"></span></h4>
                                     <div class="row mt-3">
                                         <div class="col-md-6">
-                                            <h4>Father's Information</h4>
-
-                                            <ul class="list-unstyled mt-3">
-                                                <li>
-                                                    <span class="title-span">Name:</span>
-                                                    <span class="info-span">{{ student.father_name }}</span>
-                                                </li>
-                                                <li>
-                                                    <span class="title-span">Occupation:</span>
-                                                    <span class="info-span">{{ student.father_occupation }}</span>
-                                                </li>
-                                                <li>
-                                                    <span class="title-span">Phone:</span>
-                                                    <span class="info-span">{{ student.father_phone }}</span>
-                                                </li>
-                                            </ul>
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5>Father's Information</h5>
+                                                    <ul class="list-unstyled mt-3 mb-0">
+                                                        <li>
+                                                            <span class="title-span"><strong>Name:</strong></span>
+                                                            <span class="info-span">{{ student.father_name }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Occupation:</strong></span>
+                                                            <span class="info-span">{{ student.father_occupation }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Phone:</strong></span>
+                                                            <span class="info-span">{{ student.father_phone }}</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <h4>Mother's Information</h4>
-                                            <ul class="list-unstyled mt-3">
-                                                <li>
-                                                    <span class="title-span">Name:</span>
-                                                    <span class="info-span">{{ student.mother_name }}</span>
-                                                </li>
-                                                <li>
-                                                    <span class="title-span">Occupation:</span>
-                                                    <span class="info-span">{{ student.mother_occupation }}</span>
-                                                </li>
-                                                <li>
-                                                    <span class="title-span">Phone:</span>
-                                                    <span class="info-span">{{ student.mother_phone }}</span>
-                                                </li>
-                                            </ul>
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5>Mother's Information</h5>
+                                                    <ul class="list-unstyled mt-3 mb-0">
+                                                        <li>
+                                                            <span class="title-span"><strong>Name:</strong></span>
+                                                            <span class="info-span">{{ student.mother_name }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Occupation:</strong></span>
+                                                            <span class="info-span">{{ student.mother_occupation }}</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="title-span"><strong>Phone:</strong></span>
+                                                            <span class="info-span">{{ student.mother_phone }}</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <h5 class="form-title"><span>Address</span></h5>
-                            <div class="row mt-2">
-                                <div class="col-md-6">
-                                    <h5>Permanent Address</h5>
-                                    <p>{{ student.permanent_address }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5>Present Address</h5>
-                                    <p>{{ student.present_address }}</p>
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h4>Address Information <span class="border-bottom border-dark w-100 d-inline-block" style="margin-left: 10px;"></span></h4>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5>Permanent Address</h5>
+                                                    <p class="mb-0">{{ student.permanent_address }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5>Present Address</h5>
+                                                    <p class="mb-0">{{ student.present_address }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +250,6 @@
 
 </div>
 
-
 <!-- <script data-cfasync="false" src="../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script> -->
 <script src="{%static 'assets/js/jquery-3.6.0.min.js' %}"></script>
 
@@ -155,17 +259,7 @@
 <script src="{%static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
 
 <script src="{%static 'assets/js/script.js' %}"></script>
-<script>
-    document.getElementById('show-email-btn').addEventListener('click', function () {
-        var emailLink = document.getElementById('email-link');
-        emailLink.style.display = 'inline';
-        this.style.display = 'none';
-    });
-</script>
+
 </body>
 
-<!-- Mirrored from preschool.dreamguystech.com/html-template/student-details.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 28 Oct 2021 11:11:50 GMT -->
-
-</html>
-
-{% endblock %}
+{% endblock body %}

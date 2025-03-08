@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import *
 import datetime
 from django.http import JsonResponse
+from django.contrib import messages
 
 # Helper function to generate student ID based on session
 def generate_student_id_for_session(session):
@@ -126,7 +127,6 @@ def add(request):
                 print(f"Image URL: {student.image.url}")
             
             # Redirect to the student list page after successful submission
-            from django.shortcuts import redirect
             return redirect('student-list')
             
         except Exception as e:
@@ -142,7 +142,8 @@ def add(request):
     context = {
         'student_session': student_session_choices,
         'default_session': default_session,
-        'auto_id': auto_id
+        'auto_id': auto_id,
+        'current_time':timezone.now(),
     }
     
     return render(request, 'student-add.html', context)
@@ -193,8 +194,24 @@ def edit(request, student_id):
 def details(request, student_id=None):
     try:
         student = Student.objects.get(student_id=student_id)
+        # Get all payments for this student
+        payments = Payment.objects.filter(student=student).select_related('course')
+        total_paid = sum(payment.amount_paid for payment in payments)
+        total_fees = sum(payment.course.fees for payment in payments if payment.course)
+        
+        # Get the latest course from payments
+        latest_course = None
+        if payments.exists():
+            latest_payment = payments.order_by('-payment_date').first()
+            latest_course = latest_payment.course
+        
         context = {
-            'student': student
+            'student': student,
+            'payments': payments,
+            'total_paid': total_paid,
+            'total_fees': total_fees,
+            'total_remaining': total_fees - total_paid,
+            'latest_course': latest_course
         }
         return render(request, 'student-details.html', context)
     except Student.DoesNotExist:
