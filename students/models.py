@@ -30,7 +30,7 @@ class Student(models.Model):
             (f"{year + 1}-JAN", f"{year + 1}-JAN")
         ], verbose_name="Session",default = f"{year}-JAN" if month <= 6 else f"{year}-JUL")
     religion = models.CharField(max_length=10)
-    joining_date = models.DateTimeField(auto_now_add=True, editable=False)
+    joining_date = models.DateTimeField(auto_now_add=True)
     phone = models.CharField(max_length=15)
     email = models.EmailField(max_length=64)
     image = models.ImageField(upload_to=student_image_path, blank=True, null=True)

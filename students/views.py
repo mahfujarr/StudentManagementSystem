@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import *
 import datetime
 from django.http import JsonResponse
@@ -40,7 +40,12 @@ def generate_student_id_for_session(session):
 
 # Create your views here.
 def home(request):
-    return render(request, 'index.html')
+    # Get total number of students
+    total_students = Student.objects.count()
+    context = {
+        'total_students': total_students
+    }
+    return render(request, 'index.html', context)
 
 def list(request):
     # Get all students from the database, ordered by ID
@@ -142,8 +147,48 @@ def add(request):
     
     return render(request, 'student-add.html', context)
 
-def edit(request):
-    return render(request, 'student-edit.html')
+def edit(request, student_id):
+    try:
+        student = Student.objects.get(student_id=student_id)
+        # Get session choices from the model
+        student_session_choices = Student._meta.get_field('student_session').choices
+        
+        if request.method == 'POST':
+            # Update student information
+            student.f_name = request.POST.get('first_name')
+            student.l_name = request.POST.get('last_name')
+            student.student_id = request.POST.get('student_id')
+            student.gender = request.POST.get('gender')
+            student.dob = request.POST.get('date_of_birth')
+            student.student_session = request.POST.get('student_session')
+            student.religion = request.POST.get('religion')
+            student.phone = request.POST.get('phone_number')
+            student.email = request.POST.get('email')
+            student.father_name = request.POST.get('father_name')
+            student.father_occupation = request.POST.get('father_occupation')
+            student.father_phone = request.POST.get('father_phone')
+            student.mother_name = request.POST.get('mother_name')
+            student.mother_occupation = request.POST.get('mother_occupation')
+            student.mother_phone = request.POST.get('mother_phone')
+            student.present_address = request.POST.get('present_address')
+            student.permanent_address = request.POST.get('permanent_address')
+            
+            # Handle image upload if provided
+            if 'student_image' in request.FILES:
+                student.image = request.FILES['student_image']
+            
+            student.save()
+            from django.shortcuts import redirect
+            return redirect('student-details', student_id=student.student_id)
+        
+        context = {
+            'student': student,
+            'session_choices': student_session_choices
+        }
+        return render(request, 'student-edit.html', context)
+    except Student.DoesNotExist:
+        from django.shortcuts import redirect
+        return redirect('student-list')
 
 def details(request, student_id=None):
     try:
@@ -157,11 +202,33 @@ def details(request, student_id=None):
         from django.shortcuts import redirect
         return redirect('student-list')
 
+def delete_student(request, student_id):
+    if request.method == 'POST':
+        try:
+            student = Student.objects.get(student_id=student_id)
+            # Delete the student's image if it exists
+            if student.image:
+                student.image.delete()
+            student.delete()
+            return redirect('student-list')
+        except Student.DoesNotExist:
+            pass
+    return redirect('student-list')
+
 def fees_collections(request):
     return render(request, 'fees-collections.html')
 
 def add_fees_collection(request):
     return render(request, 'add-fees-collection.html')
+
+def view_fees(request):
+    return render(request, 'view-fees.html')
+
+def login(request):
+    return render(request, 'login.html')
+
+def forgot_password(request):
+    return redirect('login')
 
 def register_new_admin(request):
     return render(request, 'register.html')
