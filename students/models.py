@@ -17,6 +17,7 @@ class Student(models.Model):
     l_name = models.CharField(max_length=255, verbose_name="Last Name")
     student_id = models.CharField(max_length=20, verbose_name="Student ID", unique=True)
     gender = models.CharField(max_length=10, choices=[('Male','Male'), ('Female', 'Female'), ('Others', 'Others') ])
+    course = models.ForeignKey('Course', on_delete=models.SET_NULL, related_name='students', null=True, blank=True)
     dob = models.DateField(verbose_name="Date of Birth")
     current_year = timezone.now().year
     year = int(str(current_year)[-2:])  # Convert to int
@@ -32,15 +33,15 @@ class Student(models.Model):
     religion = models.CharField(max_length=10)
     joining_date = models.DateTimeField(auto_now_add=True)
     phone = models.CharField(max_length=15)
-    email = models.EmailField(max_length=64)
+    email = models.EmailField(max_length=64, null=True, blank=True)
     image = models.ImageField(upload_to=student_image_path, blank=True, null=True)
     father_name = models.CharField(max_length=255, verbose_name="Father's Name")
     father_occupation = models.CharField(max_length=50, verbose_name="Father's Occupation")
-    father_phone = models.CharField(max_length=15, verbose_name="Father's Phone")
+    father_phone = models.CharField(max_length=15, null=True, blank=True, verbose_name="Father's Phone")
 
     mother_name = models.CharField(max_length=255, verbose_name="Mother's Name")
     mother_occupation = models.CharField(max_length=50, verbose_name="Mother's Occupation")
-    mother_phone = models.CharField(max_length=15, verbose_name="Mother's Phone")
+    mother_phone = models.CharField(max_length=15, null=True, blank=True, verbose_name="Mother's Phone")
 
     present_address = models.CharField(max_length=255)
     permanent_address = models.CharField(max_length=255)

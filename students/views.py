@@ -3,6 +3,7 @@ from .models import *
 import datetime
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import Max
 
 # Helper function to generate student ID based on session
 def generate_student_id_for_session(session):
@@ -71,6 +72,8 @@ def add(request):
     # Default session logic: Jan-Jun uses current year's JAN session, Jul-Dec uses current year's JUL session
     default_session = f"{year}-JAN" if current_month <= 6 else f"{year}-JUL"
     
+    courses = Course.objects.all()
+
     # Check if this is an AJAX request for a specific session ID
     if request.method == 'GET' and 'get_id_for_session' in request.GET:
         selected_session = request.GET.get('get_id_for_session')
@@ -93,11 +96,14 @@ def add(request):
             auto_id = generate_student_id_for_session(selected_session)
         
         try:
+            course_id = request.POST.get('course')
+            course = Course.objects.get(id=course_id) if course_id else None
             # Create a new Student object with the form data
             student = Student(
                 f_name=request.POST.get('first_name'),
                 l_name=request.POST.get('last_name'),
                 student_id=request.POST.get('student_id'),
+                course=course,
                 gender=request.POST.get('gender'),
                 dob=request.POST.get('date_of_birth'),
                 student_session=request.POST.get('student_session'),
@@ -135,7 +141,7 @@ def add(request):
                 'student_session': student_session_choices,
                 'default_session': default_session,
                 'auto_id': auto_id,
-                'error_message': f"Error creating student: {str(e)}"
+                'error_message': f"Error creating student: {str(e)}",
             }
             return render(request, 'student-add.html', context)
     
@@ -144,6 +150,7 @@ def add(request):
         'default_session': default_session,
         'auto_id': auto_id,
         'current_time':timezone.now(),
+        'courses': courses,
     }
     
     return render(request, 'student-add.html', context)
@@ -233,7 +240,14 @@ def delete_student(request, student_id):
     return redirect('student-list')
 
 def fees_collections(request):
-    return render(request, 'fees-collections.html')
+    course = Course.objects.all()
+    students = Student.objects.annotate(latest_payment=Max('fees__payment_date')).order_by('-latest_payment')
+
+    context = {
+        'student_list': students,
+        'course' : course,
+    }
+    return render(request, 'fees-collections.html', context)
 
 def add_fees_collection(request):
     return render(request, 'add-fees-collection.html')

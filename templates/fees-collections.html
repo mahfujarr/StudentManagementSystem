@@ -30,14 +30,14 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Name</th>
-                                        <th>Gender</th>
-                                        <th>Fees Type</th>
-                                        <th>Amount</th>
+                                        
+                                        <th>Course Name</th>
+                                        <th>Paid Amount</th>
                                         <th>Paid Date</th>
                                         <th class="text-right">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                {% comment %} <tbody>
                                     <tr>
                                         <td>PRE2209</td>
                                         <td>
@@ -55,7 +55,85 @@
                                             <span class="badge badge-success">Paid</span>
                                         </td>
                                     </tr>
+                                </tbody> {% endcomment %}
+                                <tbody>
+                                    {% for student in student_list %}
+                                        {% for payment in student.fees.all %}
+                                            <tr>
+                                                <td><a href="{% url 'student-details' student.student_id %}">{{ student.student_id }}</a></td>
+                                                <td>
+                                                    <h2 class="table-avatar">
+                                                        <a href="{% url 'student-details' student.student_id %}" class="avatar avatar-sm mr-2">
+                                                            {% if student.image %}
+                                                                <img class="avatar-img rounded-circle" src="{{ student.image.url }}" alt="User Image">
+                                                            {% else %}
+                                                                <img class="avatar-img rounded-circle" src="{% static 'assets/img/default_user.png' %}" alt="Default Image">
+                                                            {% endif %}
+                                                        </a>
+                                                        <a href="{% url 'student-details' student.student_id %}">{{ student.f_name }} {{ student.l_name }}</a>
+                                                    </h2>
+                                                </td>
+                                                <td>{{ payment.course.name }}</td>
+                                                <td>{{ payment.amount_paid }}</td>
+                                                <td>{{ payment.payment_date }}</td>
+                                                <td class="text-right">
+                                                    {% if payment.amount_paid >= student.course.fees %}
+                                                    <span class="badge badge-success">Paid</span>
+                                                    {% else %}
+                                                    <span class="badge badge-warning">Partial Payment</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-right">
+                                                    <div class="actions">
+                                                        <a href="{% url 'student-edit' student.student_id %}" class="btn btn-sm bg-success-light mr-2">
+                                                            <i class="fas fa-pen"></i>
+                                                        </a>
+                                                        <a href="{% url 'student-delete' student.student_id %}" class="btn btn-sm bg-danger-light">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td><a href="{% url 'student-details' student.student_id %}">{{ student.student_id }}</a></td>
+                                            <td>
+                                                <h2 class="table-avatar">
+                                                    <a href="{% url 'student-details' student.student_id %}" class="avatar avatar-sm mr-2">
+                                                        {% if student.image %}
+                                                            <img class="avatar-img rounded-circle" src="{{ student.image.url }}" alt="User Image">
+                                                        {% else %}
+                                                            <img class="avatar-img rounded-circle" src="{% static 'assets/img/default_user.png' %}" alt="Default Image">
+                                                        {% endif %}
+                                                    </a>
+                                                    <a href="{% url 'student-details' student.student_id %}">{{ student.f_name }} {{ student.l_name }}</a>
+                                                </h2>
+                                            </td>
+                                            <td>{{ student.course.name }}</td>
+                                            <td>{{ "00" }}</td>
+                                            <td>{{ "--" }}</td>
+                                            <td class="text-right">
+                                                <span class="badge badge-danger">Not Paid</span>
+                                            </td>
+                                            <td class="text-right">
+                                                <div class="actions">
+                                                    <a href="{% url 'student-edit' student.student_id %}" class="btn btn-sm bg-success-light mr-2">
+                                                        <i class="fas fa-pen"></i>
+                                                    </a>
+                                                    <a href="{% url 'student-delete' student.student_id %}" class="btn btn-sm bg-danger-light">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="8" class="text-center">No students found</td>
+                                        </tr>
+                                    {% endfor %}
                                 </tbody>
+                                
                             </table>
                         </div>
                     </div>
@@ -64,9 +142,6 @@
         </div>
     </div>
     {% endblock body %}
-    <footer>
-        <p>Copyright © 2020 Dreamguys.</p>
-    </footer>
 
 </div>
 
