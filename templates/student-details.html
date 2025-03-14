@@ -101,26 +101,43 @@
                                     <!-- modal -->
                                     <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
-                                          <div class="modal-content">
-                                            <div class="modal-header">
-                                              <h5 class="modal-title" id="exampleModalLabel">Adding the payment</h5>
-                                              <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
-                                            </div>
-                                            <div class="modal-body">
-                                              <form>
-                                                <div class="mb-3">
-                                                  <label for="recipient-name" class="col-form-label">Amount:</label>
-                                                  <input type="text" class="form-control" id="recipient-name">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel">Adding the payment</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
                                                 </div>
-                                              </form>
+                                                <div class="modal-body">
+                                                    <form method="POST" action="{% url 'add_payment' student.student_id %}" id="payment-form">
+                                                        {% csrf_token %}
+                                                        <div class="mb-3">
+                                                            <label for="course-select" class="col-form-label">Course:</label>
+                                                            <select class="form-control" id="course-select" name="course" required>
+                                                                <option value="">Select Course</option>
+                                                                {% for course in student.courses.all %}
+                                                                    <option value="{{ course.id }}" data-fees="{{ course.fees }}">{{ course.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="amount-paid" class="col-form-label">Amount:</label>
+                                                            <input type="number" class="form-control" id="amount-paid" name="amount_paid" required>
+                                                            <small class="text-muted" id="remaining-amount"></small>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="payment-date" class="col-form-label">Payment Date:</label>
+                                                            <input type="date" class="form-control" id="payment-date" name="payment_date" required value="{{ today|date:'Y-m-d' }}">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary">Add Payment</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
-                                            <div class="modal-footer">
-                                                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
-                                              <button type="button" class="btn btn-primary">Add Payment</button>
-                                            </div>
-                                          </div>
                                         </div>
-                                      </div>
+                                    </div>
 
                                       
                                     {% if payments %}
@@ -255,6 +272,35 @@
 <script src="{%static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
 
 <script src="{%static 'assets/js/script.js' %}"></script>
+
+<script>
+    function updateRemainingAmount() {
+        const selectedOption = document.getElementById('course-select').options[document.getElementById('course-select').selectedIndex];
+        const fees = selectedOption.getAttribute('data-fees');
+        const amountInput = document.getElementById('amount-paid');
+        const remainingText = document.getElementById('remaining-amount');
+        
+        if (fees) {
+            amountInput.setAttribute('max', fees);
+            const remaining = fees - (amountInput.value || 0);
+            if (remaining >= 0) {
+                remainingText.textContent = `Remaining: ৳${remaining}`;
+                remainingText.className = 'text-muted';
+            } else {
+                remainingText.textContent = 'Amount exceeds course fees';
+                remainingText.className = 'text-danger';
+            }
+        }
+    }
+
+    document.getElementById('course-select').addEventListener('change', updateRemainingAmount);
+    document.getElementById('amount-paid').addEventListener('input', updateRemainingAmount);
+
+    // Trigger the calculation on page load if a course is selected
+    if (document.getElementById('course-select').value) {
+        updateRemainingAmount();
+    }
+</script>
 
 </body>
 
