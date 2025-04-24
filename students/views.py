@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 import datetime
 from django.http import JsonResponse
@@ -238,6 +238,40 @@ def delete_student(request, student_id):
         except Student.DoesNotExist:
             pass
     return redirect('student-list')
+
+def add_payment(request, student_id):
+    student = get_object_or_404(Student, student_id=student_id)
+    payments = Payment.objects.filter(student=student)
+    total_paid = sum(payment.amount_paid for payment in payments)
+    total_fees = sum(payment.course.fees for payment in payments if payment.course)
+    total_remaining = total_fees - total_paid
+    
+    if request.method == "POST":
+        course_id = request.POST.get("course")
+        amount_paid = request.POST.get("amount_paid")
+        payment_date = request.POST.get("payment_date", timezone.now().date())
+        
+        course = get_object_or_404(Course, id=course_id)
+        
+        Payment.objects.create(
+            student=student,
+            course=course,
+            amount_paid=amount_paid,
+            payment_date=payment_date
+        )
+        messages.success(request, "Payment added successfully!")
+        return redirect("student-details", student_id=student.student_id)
+    
+    today = timezone.now().date()
+    return render(request, "student-details.html", {
+        "student": student,
+        "payments": payments,
+        "total_paid": total_paid,
+        "total_fees": total_fees,
+        "total_remaining": total_remaining,
+        "today": today
+    })
+
 
 def fees_collections(request):
     course = Course.objects.all()
