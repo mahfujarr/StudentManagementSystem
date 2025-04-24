@@ -10,18 +10,34 @@
                         <div class="col">
                             <h3 class="page-title">Add Fees</h3>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="fees-collections.html">Accounts</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'fees-collections' %}">Accounts</a></li>
                                 <li class="breadcrumb-item active">Add Fees</li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
+                {% if messages %}
+                <div class="row">
+                    <div class="col-12">
+                        {% for message in messages %}
+                        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="card">
                             <div class="card-body">
-                                <form>
+                                <form method="POST">
+                                    {% csrf_token %}
                                     <div class="row">
                                         <div class="col-12">
                                             <h5 class="form-title"><span>Fees Information</span></h5>
@@ -29,49 +45,40 @@
                                         <div class="col-12 col-sm-6">
                                             <div class="form-group">
                                                 <label>Student ID</label>
-                                                <input type="text" class="form-control">
+                                                <input type="text" class="form-control" name="student_id" value="{{ student.student_id }}" {% if student %}readonly{% endif %} required>
                                             </div>
                                         </div>
                                         <div class="col-12 col-sm-6">
                                             <div class="form-group">
                                                 <label>Student Name</label>
-                                                <input type="text" class="form-control">
+                                                <input type="text" class="form-control" value="{% if student %}{{ student.f_name }} {{ student.l_name }}{% endif %}" readonly>
                                             </div>
                                         </div>
                                         <div class="col-12 col-sm-6">
                                             <div class="form-group">
-                                                <label>Gender</label>
-                                                <select class="form-control">
-                                                    <option>Select Gender</option>
-                                                    <option>Female</option>
-                                                    <option>Male</option>
-                                                    <option>Others</option>
-                                                </select>
+                                                <label>Course</label>
+                                                <input type="text" class="form-control" value ="{{course.id}} - {{course.fees}}" >
+                                                {% comment %} <select class="form-control" name="course" required id="course-select">
+                                                    <option value="">Select Course</option>
+                                                    {% for course in courses %}
+                                                    <option value="{{ course.id }}" data-fees="{{ course.fees }}" {% if selected_course and selected_course.id == course.id %}selected{% endif %}>
+                                                        {{ course.name }} (৳{{ course.fees }})
+                                                    </option>
+                                                    {% endfor %}
+                                                </select> {% endcomment %}
                                             </div>
                                         </div>
                                         <div class="col-12 col-sm-6">
                                             <div class="form-group">
-                                                <label>Fees Type</label>
-                                                <select class="form-control">
-                                                    <option>Select Type</option>
-                                                    <option>Class Test</option>
-                                                    <option>Exam Fees</option>
-                                                    <option>Hostel Fees</option>
-                                                    <option>Transport Fees</option>
-                                                    <option>Mess Fees</option>
-                                                </select>
+                                                <label>Amount Paid</label>
+                                                <input type="number" class="form-control" name="amount_paid" required id="amount-paid">
+                                                <small class="text-muted" id="remaining-amount"></small>
                                             </div>
                                         </div>
                                         <div class="col-12 col-sm-6">
                                             <div class="form-group">
-                                                <label>Fees Amount</label>
-                                                <input type="text" class="form-control">
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6">
-                                            <div class="form-group">
-                                                <label>Paid Date</label>
-                                                <input type="date" class="form-control">
+                                                <label>Payment Date</label>
+                                                <input type="date" class="form-control" name="payment_date" required value="{{ today|date:'Y-m-d' }}">
                                             </div>
                                         </div>
                                         <div class="col-12">
@@ -85,7 +92,35 @@
                 </div>
             </div>
         </div>
-        {% endblock body %}
+{% endblock body %}
+        <script>
+        function updateRemainingAmount() {
+            const selectedOption = document.getElementById('course-select').options[document.getElementById('course-select').selectedIndex];
+            const fees = selectedOption.getAttribute('data-fees');
+            const amountInput = document.getElementById('amount-paid');
+            const remainingText = document.getElementById('remaining-amount');
+            
+            if (fees) {
+                amountInput.setAttribute('max', fees);
+                const remaining = fees - (amountInput.value || 0);
+                if (remaining >= 0) {
+                    remainingText.textContent = `Remaining: ৳${remaining}`;
+                    remainingText.className = 'text-muted';
+                } else {
+                    remainingText.textContent = 'Amount exceeds course fees';
+                    remainingText.className = 'text-danger';
+                }
+            }
+        }
+
+        document.getElementById('course-select').addEventListener('change', updateRemainingAmount);
+        document.getElementById('amount-paid').addEventListener('input', updateRemainingAmount);
+
+        // Trigger the calculation on page load if a course is selected
+        if (document.getElementById('course-select').value) {
+            updateRemainingAmount();
+        }
+        </script>
 
     <script src="assets/js/jquery-3.6.0.min.js"></script>
 
