@@ -4,6 +4,9 @@ import datetime
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Max
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login as auth_login, logout
+from django.contrib.auth.models import User
 
 # Helper function to generate student ID based on session
 def generate_student_id_for_session(session):
@@ -41,6 +44,7 @@ def generate_student_id_for_session(session):
     return f"{session_year}{session_month}{next_seq_num:03d}"
 
 # Create your views here.
+@login_required
 def home(request):
     # Get total number of students
     total_students = Student.objects.count()
@@ -49,6 +53,7 @@ def home(request):
     }
     return render(request, 'index.html', context)
 
+@login_required
 def list(request):
     # Get all students from the database, ordered by ID
     students = Student.objects.all().order_by('-id')
@@ -60,6 +65,7 @@ def list(request):
     
     return render(request, 'student-list.html', context)
 
+@login_required
 def add(request):
     # Get session choices from the model
     student_session_choices = Student._meta.get_field('student_session').choices
@@ -155,6 +161,7 @@ def add(request):
     
     return render(request, 'student-add.html', context)
 
+@login_required
 def edit(request, student_id):
     try:
         student = Student.objects.get(student_id=student_id)
@@ -198,6 +205,7 @@ def edit(request, student_id):
         from django.shortcuts import redirect
         return redirect('student-list')
 
+@login_required
 def details(request, student_id=None):
     try:
         student = Student.objects.get(student_id=student_id)
@@ -226,6 +234,7 @@ def details(request, student_id=None):
         from django.shortcuts import redirect
         return redirect('student-list')
 
+@login_required
 def delete_student(request, student_id):
     if request.method == 'POST':
         try:
@@ -239,6 +248,7 @@ def delete_student(request, student_id):
             pass
     return redirect('student-list')
 
+@login_required
 def add_payment(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
     payments = Payment.objects.filter(student=student)
@@ -272,7 +282,7 @@ def add_payment(request, student_id):
         "today": today
     })
 
-
+@login_required
 def fees_collections(request):
     course = Course.objects.all()
     students = Student.objects.annotate(latest_payment=Max('fees__payment_date')).order_by('-latest_payment')
@@ -283,17 +293,83 @@ def fees_collections(request):
     }
     return render(request, 'fees-collections.html', context)
 
+@login_required
 def add_fees_collection(request):
     return render(request, 'add-fees-collection.html')
 
+@login_required
 def view_fees(request):
     return render(request, 'view-fees.html')
 
 def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            auth_login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    
     return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 def forgot_password(request):
     return redirect('login')
 
+@login_required
 def register_new_admin(request):
+    # Only superusers can register new admins
+    if not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to register new admins.')
+        return redirect('home')
+        
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate input
+        if not username or not email or not password:
+            messages.error(request, 'All fields are required.')
+            return render(request, 'register.html')
+            
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'register.html')
+            
+        if len(password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+            return render(request, 'register.html')
+        
+        # Check if username or email already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists.')
+            return render(request, 'register.html')
+            
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists.')
+            return render(request, 'register.html')
+        
+        try:
+            # Create the user with staff and superuser privileges
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                is_staff=True,
+                is_superuser=True
+            )
+            messages.success(request, 'Admin user created successfully.')
+            return redirect('home')
+        except Exception as e:
+            messages.error(request, f'Error creating admin user: {str(e)}')
+            return render(request, 'register.html')
+    
     return render(request, 'register.html')

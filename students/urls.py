@@ -30,6 +30,7 @@ urlpatterns = [
     path('add_fees_collection', add_fees_collection, name='add-fees-collection'),
     path('view-fees', view_fees, name='view-fees'),
     path('login', login, name='login'),
+    path('logout', logout_view, name='logout'),
     path('forgot-password', forgot_password, name='forgot-password'),
     path('register-new-admin', register_new_admin, name='register-new-admin'),
 ]
